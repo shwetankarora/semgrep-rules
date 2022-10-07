@@ -1,0 +1,144 @@
+rules:
+- id: custom_object_injection_sink
+  patterns:
+    - pattern: $O[$ARG]
+    - pattern-not: $O["..."]
+    - pattern-not: "$O[($ARG : float)]"
+    - pattern-not-inside: |
+        if (Object.prototype.hasOwnProperty.call($O, $ARG)) {
+          ...
+        }
+    - pattern-not-inside: |
+        const [$ARG, $M] = useState(($N: float))
+        ...
+        <... $O[$ARG] ...>;
+    - pattern-not-inside: |
+        function $METHOD_NAME(..., $ARG: number, ...) {
+          ...
+        }
+    - pattern-not-inside: |
+        function(..., $ARG: number, ...) {
+          ...
+        }
+    - pattern-not-inside: |
+        $ARG = $V;
+        ...
+        <... $O[$ARG] ...>;
+    - pattern-not-inside: |
+        for (var $ARG = ($N: float); ...; ...) {
+          ...
+        }
+    - pattern-not-inside: |
+        for ($ARG = ($N: float); ...; ...) {
+          ...
+        }
+    - pattern-not-inside: |
+        for (var $ARG = $ANYTHING.length - ($N: float); ...; ...) {
+          ...
+        }
+    - pattern-not-inside: |
+        for (var $ARG = $ANYTHING.length; ...; ...) {
+          ...
+        }
+    - pattern-not-inside: |
+        for (var $ARG in $O) {
+          ...
+        }
+    - pattern-not-inside: |
+        Object.keys($O).forEach(function($ARG, ...) {
+          ...
+        }, ...)
+    - pattern-not-inside: |
+        $ARRAY = Object.keys($O)
+        ...
+        $ARRAY.forEach(function($ARG, ...) {
+          ...
+        }, ...)
+    - pattern-not-inside: |
+        $ANYTHING.forEach(function($ARG0, $ARG, $ARG1) {
+          ...
+        }, ...)
+    - pattern-not-inside: |
+        $ANYTHING.forEach(function($ARG0, $ARG) {
+          ...
+        }, ...)
+    - pattern-not-inside: |
+        Object.keys($O).map(function($ARG, ...) {
+          ...
+        }, ...)
+    - pattern-not-inside: |
+        $ARRAY = Object.keys($O)
+        ...
+        $ARRAY.map(function($ARG, ...) {
+          ...
+        }, ...)
+    - pattern-not-inside: |
+        $ANYTHING.map(function($ARG0, $ARG, $ARG1) {
+          ...
+        }, ...)
+    - pattern-not-inside: |
+        $ANYTHING.map(function($ARG0, $ARG) {
+          ...
+        }, ...)
+    - pattern-not-inside: |
+        Object.keys($O).filter(function($ARG, ...) {
+          ...
+        }, ...)
+    - pattern-not-inside: |
+        $ARRAY = Object.keys($O)
+        ...
+        $ARRAY.filter(function($ARG, ...) {
+          ...
+        }, ...)
+    - pattern-not-inside: |
+        $ANYTHING.filter(function($ARG0, $ARG, $ARG1) {
+          ...
+        }, ...)
+    - pattern-not-inside: |
+        $ANYTHING.filter(function($ARG0, $ARG) {
+          ...
+        }, ...)
+    - pattern-not-inside: |
+        Object.keys($O).some(function($ARG, ...) {
+          ...
+        }, ...)
+    - pattern-not-inside: |
+        $ARRAY = Object.keys($O)
+        ...
+        $ARRAY.some(function($ARG, ...) {
+          ...
+        }, ...)
+    - pattern-not-inside: |
+        $ANYTHING.some(function($ARG0, $ARG, $ARG1) {
+          ...
+        }, ...)
+    - pattern-not-inside: |
+        $ANYTHING.some(function($ARG0, $ARG) {
+          ...
+        }, ...)
+    - pattern-not-inside: |
+        Object.entries($O).forEach(function([$ARG, $V], ...) {
+          ...
+        }, ...)
+    - pattern-not-inside: |
+        $ARRAY = Object.entries($O)
+        ...
+        $ARRAY.forEach(function([$ARG, $V], ...) {
+          ...
+        }, ...)
+    - metavariable-pattern:
+        metavariable: $ARG
+        patterns:
+          - pattern-not-regex: ([\+\-\*\/\s]\d+)
+          - pattern-not-regex: (^\d+)
+  message: Bracket object notation with user input is present, this might allow an
+    attacker to access all properties of the object and even it's prototype,
+    leading to possible code execution. Remediation - https://gitlab.com/affinidi/security/appsec-scanners/appsec-vulnerabilty-remediation/-/blob/main/Web%20App/object_injection_sink.js
+  languages:
+    - javascript
+    - typescript
+  severity: WARNING
+  metadata:
+    cwe: "CWE-94: Improper Control of Generation of Code ('Code Injection')"
+    license: MIT
+
